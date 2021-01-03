@@ -389,3 +389,24 @@ function addRole(){
     });
     
 }
+
+// Add Department
+function addDept(){
+
+    inquirer.prompt({
+
+            // Prompt user for name of department
+            name: "deptName",
+            type: "input",
+            message: "Department Name: "
+        }).then((answer) => {
+                
+            // add department to the table
+            connection.query(`INSERT INTO department (name)VALUES ("${answer.deptName}");`, (err, res) => {
+                if(err) return err;
+                console.log("\n DEPARTMENT ADDED...\n ");
+                mainMenu();
+            });
+
+        });
+}
