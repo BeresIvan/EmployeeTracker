@@ -20,7 +20,7 @@ const connection = mysql.createConnection(connectionProperties);
 connection.connect((err) => {
     if (err) throw err;
     // Start main menu function
-    console.log("\n EMPLOYEE TRACKER \n");
+    console.log("\nx ______                 _                         _______             _             x\nx|  ____|               | |                       |__   __|           | |            x\nx| |__   _ __ ___  _ __ | | ___  _   _  ___  ___     | |_ __ __ _  ___| | _____ _ __ x\nx|  __| | '_ ` _ || '_ || |/ _ || | | |/ _ |/ _ |    | | '__/ _` |/ __| |/ / _ | '__|x\nx| |____| | | | | | |_) | | (_) | |_| |  __/  __/    | | | | (_| | (__|   <  __/ |   x\nx|______|_| |_| |_| .__/|_||___/ |__, ||___||___|    |_|_|  |__,_||___|_||_|___|_|   x\nx                 | |             __/ |                                              x\nx                 |_|            |___/                                               x\n");
     mainMenu();
 });
 
