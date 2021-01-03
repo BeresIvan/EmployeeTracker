@@ -9,7 +9,7 @@ INSERT INTO department (id, name)
 VALUES (2, "Finance");
 
 INSERT INTO department (id, name)
-VALUES (3, "Human Resouces");
+VALUES (3, "Human Resources");
 
 INSERT INTO department (id, name)
 VALUES (4, "IT");
