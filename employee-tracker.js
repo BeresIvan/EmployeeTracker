@@ -209,6 +209,70 @@ function viewAllEmpByRole(){
     });
 }
 
+// View all employees by manager
+function viewAllEmpByMngr(){
+
+    // set manager array
+    let managerArr = [];
+
+    // Create connection using promise-sql
+    promisemysql.createConnection(connectionProperties)
+    .then((conn) => {
+
+        // Query all employees
+        return conn.query("SELECT DISTINCT m.id, CONCAT(m.first_name, ' ', m.last_name) AS manager FROM employee e Inner JOIN employee m ON e.manager_id = m.id");
+
+    }).then(function(managers){
+
+        // place all employees in array
+        for (i=0; i < managers.length; i++){
+            managerArr.push(managers[i].manager);
+        }
+
+        return managers;
+    }).then((managers) => {
+
+        inquirer.prompt({
+
+            // Prompt user of manager
+            name: "manager",
+            type: "list",
+            message: "Which manager would you like to search?",
+            choices: managerArr
+        })    
+        .then((answer) => {
+
+            let managerID;
+
+            // get ID of manager selected
+            for (i=0; i < managers.length; i++){
+                if (answer.manager == managers[i].manager){
+                    managerID = managers[i].id;
+                }
+            }
+
+            // query all employees by selected manager
+            const query = `SELECT e.id, e.first_name, e.last_name, role.title, department.name AS department, role.salary, concat(m.first_name, ' ' ,  m.last_name) AS manager
+            FROM employee e
+            LEFT JOIN employee m ON e.manager_id = m.id
+            INNER JOIN role ON e.role_id = role.id
+            INNER JOIN department ON role.department_id = department.id
+            WHERE e.manager_id = ${managerID};`;
+    
+            connection.query(query, (err, res) => {
+                if(err) return err;
+                
+                // display results with console.table
+                console.log("\n");
+                console.table(res);
+
+                // back to main menu
+                mainMenu();
+            });
+        });
+    });
+}
+
 // Add employee
 function addEmp(){
 
@@ -555,5 +619,242 @@ function updateEmpMngr(){
                     mainMenu();
                 });
             });
+    });
+}
+
+// Delete employee
+function deleteEmp(){
+
+    // Create global employee array
+    let employeeArr = [];
+
+    // Create connection using promise-sql
+    promisemysql.createConnection(connectionProperties
+    ).then((conn) => {
+
+        // Query all employees
+        return  conn.query("SELECT employee.id, concat(employee.first_name, ' ' ,  employee.last_name) AS employee FROM employee ORDER BY Employee ASC");
+    }).then((employees) => {
+
+        // Place all employees in array
+        for (i=0; i < employees.length; i++){
+            employeeArr.push(employees[i].employee);
+        }
+
+        inquirer.prompt([
+            {
+                // prompt user of all employees
+                name: "employee",
+                type: "list",
+                message: "Who would you like to delete?",
+                choices: employeeArr
+            }, {
+                // confirm delete of employee
+                name: "yesNo",
+                type: "list",
+                message: "Confirm deletion",
+                choices: ["NO", "YES"]
+            }]).then((answer) => {
+
+                if(answer.yesNo == "YES"){
+                    let employeeID;
+
+                    // if confirmed, get ID of employee selected
+                    for (i=0; i < employees.length; i++){
+                        if (answer.employee == employees[i].employee){
+                            employeeID = employees[i].id;
+                        }
+                    }
+                    
+                    // deleted selected employee
+                    connection.query(`DELETE FROM employee WHERE id=${employeeID};`, (err, res) => {
+                        if(err) return err;
+
+                        // confirm deleted employee
+                        console.log(`\n EMPLOYEE '${answer.employee}' DELETED...\n `);
+                        
+                        // back to main menu
+                        mainMenu();
+                    });
+                } 
+                else {
+                    
+                    // if not confirmed, go back to main menu
+                    console.log(`\n EMPLOYEE '${answer.employee}' NOT DELETED...\n `);
+
+                    // back to main menu
+                    mainMenu();
+                }
+                
+            });
+    });
+}
+
+// Delete Role
+function deleteRole(){
+
+    // Create role array
+    let roleArr = [];
+
+    // Create connection using promise-sql
+    promisemysql.createConnection(connectionProperties
+    ).then((conn) => {
+
+        // query all roles
+        return conn.query("SELECT id, title FROM role");
+    }).then((roles) => {    
+
+        // add all roles to array
+        for (i=0; i < roles.length; i++){
+            roleArr.push(roles[i].title);
+        }
+
+        inquirer.prompt([{
+            // confirm to continue to select role to delete
+            name: "continueDelete",
+            type: "list",
+            message: "*** WARNING *** Deleting role will delete all employees associated with the role. Do you want to continue?",
+            choices: ["NO", "YES"]
+        }]).then((answer) => {
+
+            // if not, go to main menu
+            if (answer.continueDelete === "NO") {
+                mainMenu();
+            }
+
+        }).then(() => {
+
+            inquirer.prompt([{
+                // prompt user of of roles
+                name: "role",
+                type: "list",
+                message: "Which role would you like to delete?",
+                choices: roleArr
+            }, {
+                // confirm to delete role by typing role exactly
+                name: "confirmDelete",
+                type: "Input",
+                message: "Type the role title EXACTLY to confirm deletion of the role"
+
+            }]).then((answer) => {
+
+                if(answer.confirmDelete === answer.role){
+
+                    // get role id of of selected role
+                    let roleID;
+                    for (i=0; i < roles.length; i++){
+                        if (answer.role == roles[i].title){
+                            roleID = roles[i].id;
+                        }
+                    }
+                    
+                    // delete role
+                    connection.query(`DELETE FROM role WHERE id=${roleID};`, (err, res) => {
+                        if(err) return err;
+
+                        // confirm role has been added 
+                        console.log(`\n ROLE '${answer.role}' DELETED...\n `);
+
+                        //back to main menu
+                        mainMenu();
+                    });
+                } 
+                else {
+
+                    // if not confirmed, do not delete
+                    console.log(`\n ROLE '${answer.role}' NOT DELETED...\n `);
+
+                    //back to main menu
+                    mainMenu();
+                }
+                
+            });
+        })
+    });
+}
+
+// Delete Department
+function deleteDept(){
+
+    // department array
+    let deptArr = [];
+
+    // Create connection using promise-sql
+    promisemysql.createConnection(connectionProperties
+    ).then((conn) => {
+
+        // query all departments
+        return conn.query("SELECT id, name FROM department");
+    }).then((depts) => {
+
+        // add all departments to array
+        for (i=0; i < depts.length; i++){
+            deptArr.push(depts[i].name);
+        }
+
+        inquirer.prompt([{
+
+            // confirm to continue to select department to delete
+            name: "continueDelete",
+            type: "list",
+            message: "*** WARNING *** Deleting a department will delete all roles and employees associated with the department. Do you want to continue?",
+            choices: ["NO", "YES"]
+        }]).then((answer) => {
+
+            // if not, go back to main menu
+            if (answer.continueDelete === "NO") {
+                mainMenu();
+            }
+
+        }).then(() => {
+
+            inquirer.prompt([{
+
+                // prompt user to select department
+                name: "dept",
+                type: "list",
+                message: "Which department would you like to delete?",
+                choices: deptArr
+            }, {
+
+                // confirm with user to delete
+                name: "confirmDelete",
+                type: "Input",
+                message: "Type the department name EXACTLY to confirm deletion of the department: "
+
+            }]).then((answer) => {
+
+                if(answer.confirmDelete === answer.dept){
+
+                    // if confirmed, get department id
+                    let deptID;
+                    for (i=0; i < depts.length; i++){
+                        if (answer.dept == depts[i].name){
+                            deptID = depts[i].id;
+                        }
+                    }
+                    
+                    // delete department
+                    connection.query(`DELETE FROM department WHERE id=${deptID};`, (err, res) => {
+                        if(err) return err;
+
+                        // confirm department has been deleted
+                        console.log(`\n DEPARTMENT '${answer.dept}' DELETED...\n `);
+
+                        // back to main menu
+                        mainMenu();
+                    });
+                } 
+                else {
+
+                    // do not delete department if not confirmed and go back to main menu
+                    console.log(`\n DEPARTMENT '${answer.dept}' NOT DELETED...\n `);
+
+                    //back to main menu
+                    mainMenu();
+                }
+                
+            });
+        })
     });
 }
