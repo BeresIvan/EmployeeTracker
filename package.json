@@ -1,7 +1,7 @@
 {
   "name": "EmployeeTracker",
   "version": "1.0.0",
-  "description": "",
+  "description": "As a business owner\r I want to be able to view and manage the departments, roles, and employees in my company\r So that I can organize and plan my business\r * Design the following database schema containing three tables: Employee, Role, Department.\r * Build a command-line application that at a minimum allows the user to:\r * Add departments, roles, employees\r * View departments, roles, employees\r * Update employee roles\r * Update employee managers\r * View employees by manager\r * Delete departments, roles, and employees\r * View the total utilized budget of a department -- ie the combined salaries of all employees in that department",
   "main": "employee-tracker.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -22,5 +22,6 @@
     "inquirer": "^7.3.3",
     "mysql": "^2.18.1",
     "promise-mysql": "^5.0.1"
-  }
+  },
+  "devDependencies": {}
 }
